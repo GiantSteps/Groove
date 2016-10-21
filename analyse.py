@@ -25,6 +25,22 @@ from essentia.standard import *
 import numpy as np
 import matplotlib.pyplot as plt
 
+def nearestNeighbour(targetValue, vector):
+    minIndex = 0
+    minDiff = targetValue - vector[0]
+    minAbsDiff = abs(minDiff)
+
+    for index, value in enumerate(vector):
+        diff = targetValue - value
+        absDiff = abs(diff)
+        if absDiff < minAbsDiff:
+            minIndex = index
+            minDiff = diff
+            minAbsDiff = absDiff
+
+    return minIndex, minDiff
+
+
 def extractor(filename):
     # load our audio into an array
     audio = MonoLoader(filename = filename)()
@@ -39,8 +55,18 @@ def extractor(filename):
 
     # Our metronome 16ths
     idealSixteenths = np.linspace(0, dur, 17)
-    
-    plt.plot(audio)
+
+    #Time deviations
+    devs = []
+
+    for onset in onsets:
+        devs.append(nearestNeighbour(onset, idealSixteenths))
+
+    print devs
+
+    # Plot
+
+    plt.plot(audio)        
 
     for loc in idealSixteenths:
         posInSamples = loc * 44100
@@ -48,7 +74,7 @@ def extractor(filename):
 
     for onset in onsets:
         posInSamples = onset * 44100
-        plt.axvline(x=posInSamples, color='g')        
+        plt.axvline(x=posInSamples, color='g')                
 
     plt.show()
 
